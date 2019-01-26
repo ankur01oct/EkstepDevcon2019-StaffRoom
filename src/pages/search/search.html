@@ -1,5 +1,5 @@
 <ion-header>
-  <ion-navbar>
+  <!-- <ion-navbar *ngIf="searchContentResult" >
     <ion-input type="search" #searchInput dir="{{commonUtilService.getAppDirection()}}" placeholder="Search" [(ngModel)]="searchKeywords" (keyup.enter)="handleSearch()"
       clearInput></ion-input>
     <ion-buttons end>
@@ -7,6 +7,9 @@
         <img [src]="filterIcon" class="tool-icon" float-end />
       </button>
     </ion-buttons>
+  </ion-navbar> -->
+  <ion-navbar center>
+    Available Courses
   </ion-navbar>
 </ion-header>
 <ion-content>
@@ -155,24 +158,19 @@
           </span>
         </div>
       </div>
-      <!-- <span *ngIf="!content.subject">
-          <span *ngIf="content.gradeLevel.length">
-            <span *ngFor="let gradelevel of content.gradeLevel; let i= index">{{i == 0 ? '' : ',' +' '}} {{ gradelevel }}</span>
-          </span>
-        </span> -->
-      <!-- <span *ngIf="content.gradeLevel.length && !content.subject">
-            <span  style="width:50%" *ngFor="let gradelevel of content.gradeLevel; let i= index">{{i == 0 ? '' : ',' +' '}} {{ gradelevel }}</span>
-          </span> -->
-      <!-- <span *ngIf="content.gradeLevel.length<=2 && !content.subject">
-              <span  style="width:50%" *ngFor="let gradelevel of content.gradeLevel; let i= index">{{i == 0 ? '' : ',' +' '}} {{ gradelevel }}</span>
-            </span> -->
-      <!-- </span> -->
-      <!-- <span *ngIf="content.subject">{{ content.gradeLevel && content.gradeLevel.length ? '•' : '' }} {{ content.subject }}</span> -->
+      <ion-icon name="play" float-end color="green" ></ion-icon>
 
     </ion-item>
   </ion-list>
-  <div class="empty-search-result" *ngIf="!showLoader && showEmptyMessage" text-center padding-top>
-    {{ 'EMPTY_SEARCH_RESULTS' | translate }}
+  <div class="empty-search-result" *ngIf="showStartClass" text-center padding-top>
+      CLASS NOT STARTED
+  </div>
+  <div *ngIf="showStartClass" text-center padding-top>
+   
+  <button ion-button block  (click)="startClassroom()">START CLASS</button>
+  </div>
+  <div *ngIf="!showStartClass" text-center padding-top>
+      <button ion-button block  (click)="endClassroom()">END CLASS</button>
   </div>
 </ion-content>
 

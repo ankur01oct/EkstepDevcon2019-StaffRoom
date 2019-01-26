@@ -171,7 +171,7 @@ export class MyApp {
                 // Check if User has filled all the required information of the on boarding preferences
               } else {
                 this.appGlobalService.isProfileSettingsCompleted = false;
-                that.rootPage = LanguageSettingsPage;
+                that.rootPage = UserTypeSelectionPage;
               }
             });
         } else {

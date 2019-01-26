@@ -4,6 +4,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { SunbirdQRScanner } from './sunbirdqrscanner.service';
 import { QRScannerAlert } from './qrscanner_alert';
 import { IonicPageModule } from 'ionic-angular';
+import { VisitorService } from './visitorservice';
 
 @NgModule({
   declarations: [
@@ -15,7 +16,8 @@ import { IonicPageModule } from 'ionic-angular';
     TranslateModule.forChild()
   ],
   providers: [
-    SunbirdQRScanner
+    SunbirdQRScanner,
+    VisitorService
   ]
 })
 export class QRScannerModule {

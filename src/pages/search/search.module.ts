@@ -9,6 +9,8 @@ import { IonicImageLoader } from 'ionic-image-loader';
 import { Network } from '@ionic-native/network';
 import { PipesModule } from '../../pipes/pipes.module';
 import { ComponentsModule } from '../../component/components.module';
+import { PackageSearchService } from './packagesearch.service';
+import { PacketService } from './packetService';
 
 @NgModule({
   declarations: [
@@ -30,6 +32,8 @@ import { ComponentsModule } from '../../component/components.module';
   ],
   providers: [
     Network,
+    PackageSearchService,
+    PacketService
   ]
 })
 export class SearchModule {

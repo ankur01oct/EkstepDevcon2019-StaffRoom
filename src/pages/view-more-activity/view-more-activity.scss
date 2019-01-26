@@ -33,5 +33,9 @@ page-view-more-activity {
         @include margin(-16px, -16px, 16px, -16px);
         @include padding(0, 16px);
     }
+        .bg {
+            background-color: #EDEDED;
+          }
+    
 
 }

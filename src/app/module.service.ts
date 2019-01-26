@@ -66,9 +66,7 @@ const PROFILE_TAB = {
 
 export const GUEST_TEACHER_TABS = [
     // HOME_TAB,
-    COURSE_TAB,
-    LIBRARY_TAB,
-    GUEST_PROFILE_TAB
+    LIBRARY_TAB
 ];
 
 export const LOGIN_TEACHER_TABS = [

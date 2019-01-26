@@ -75,6 +75,8 @@ export class ContentDetailsPage {
   isChildContent = false;
   contentDetails: any;
   identifier: string;
+  startdate: any;
+  enddate: any;
 
   /**
    * To hold previous state data
@@ -192,6 +194,7 @@ export class ContentDetailsPage {
     this.source = this.navParams.get('source');
     this.shouldGenerateEndTelemetry = this.navParams.get('shouldGenerateEndTelemetry');
     this.downloadAndPlay = this.navParams.get('downloadAndPlay');
+   
 
     if (this.isResumedCourse) {
       this.navCtrl.insert(this.navCtrl.length() - 1, EnrolledCourseDetailsPage, {
@@ -245,6 +248,10 @@ export class ContentDetailsPage {
       if (this.isPlayerLaunched) {
         this.isPlayerLaunched = false;
         this.setContentDetails(this.identifier, false, true /* No Automatic Rating for 1.9.0 */);
+        this.enddate = new Date().getTime();
+        const diff = this.enddate - this.startdate;
+        // generate engagemet telemetry
+        console.log('engagement telemetry', diff);
       }
       // this.updateContentProgress();
     });
@@ -816,6 +823,8 @@ export class ContentDetailsPage {
   playContent(isStreaming: boolean) {
     // set the boolean to true, so when the content player is closed, we get to know that
     // we are back from content player
+    this.startdate = new Date().getTime();
+    console.log('player start time', this.startdate);
     if (this.apiLevel < 21 && this.appAvailability === 'false') {
       this.showPopupDialog();
     } else {
@@ -860,10 +869,18 @@ export class ContentDetailsPage {
           });
       }
       this.downloadAndPlay = false;
-      const request: any = {};
+      let request: any = {};
       if (isStreaming) {
         request.streaming = isStreaming;
       }
+      const temp = JSON.parse(this.content.playContent);
+      console.log('temp', temp);
+        temp.hierarchyInfo = this.commonUtilService.hierarchyInfo;
+        this.content.playContent = JSON.stringify(temp);
+        console.log( '*******' , JSON.parse(this.content.playContent));
+        const req = {'topic': this.content.topic[0]};
+        request = {...request, ...req};
+        console.log ('request', request);
 
       (<any>window).geniecanvas.play(this.content.playContent, JSON.stringify(request));
     }

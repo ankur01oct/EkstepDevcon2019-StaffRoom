@@ -1,3 +1,6 @@
+import { HttpClient } from '@angular/common/http';
+import { ViewMoreActivityPage } from './../view-more-activity/view-more-activity';
+import { SearchPage } from './../search/search';
 import { initTabs, GUEST_TEACHER_TABS, GUEST_STUDENT_TABS } from './../../app/module.service';
 import { CommonUtilService } from './../../service/common-util.service';
 import { Injectable } from '@angular/core';
@@ -24,7 +27,8 @@ import {
   TabsPage,
   ProfileType,
   ContainerService,
-  Profile
+  Profile,
+  DeviceInfoService
 } from 'sunbird';
 import { TelemetryGeneratorService } from '../../service/telemetry-generator.service';
 import { QRScannerResultHandler } from './qrscanresulthandler.service';
@@ -32,6 +36,7 @@ import { ProfileSettingsPage } from '../profile-settings/profile-settings';
 import { App } from 'ionic-angular';
 import { AppGlobalService } from '../../service/app-global.service';
 import { Subscription } from 'rxjs';
+import { VisitorService } from './visitorservice';
 
 @Injectable()
 export class SunbirdQRScanner {
@@ -50,6 +55,7 @@ export class SunbirdQRScanner {
   private pauseSubscription?: Subscription;
   source: string;
   showButton = false;
+  deviceId: string;
 
   constructor(
     private popCtrl: PopoverController,
@@ -62,6 +68,9 @@ export class SunbirdQRScanner {
     private commonUtil: CommonUtilService,
     private appGlobalService: AppGlobalService,
     private container: ContainerService,
+    private visitorService: VisitorService,
+    private deviceService: DeviceInfoService,
+    private http: HttpClient
   ) {
     const that = this;
     this.translate.get(this.QR_SCANNER_TEXT).subscribe((data) => {
@@ -72,6 +81,9 @@ export class SunbirdQRScanner {
 
     this.translate.onLangChange.subscribe(() => {
       that.mQRScannerText = that.translate.instant(that.QR_SCANNER_TEXT);
+    });
+    this.deviceService.getDeviceID().then((data: any) => {
+      this.deviceId = data;
     });
   }
 
@@ -152,11 +164,68 @@ export class SunbirdQRScanner {
     this.stopScanner();
     this.app.getActiveNavs()[0].push(TabsPage, { loginMode: 'guest' });
   }
+  generateStartEventForDevCon(scannedData) {
+    const telemetry = {
+      eid: 'DC_START',
+      ets: (new Date).getTime(),
+      did: this.deviceId,
+      dimensions: {
+        visitorId: scannedData.code,
+        visitorName: scannedData.name,
+        stallId: 'STA2',
+        stallName: 'CLASSROOM',
+        ideaId: 'IDE6',
+        ideaName: 'APPU Classroom',
+        topics: [],
+      },
+      edata: {
+        type: 'attendance',
+        value: 100
+      }
+    };
+    const request = {
+      'events': telemetry
+    };
+    this.http.post('http://52.172.188.118:3000/v1/telemetry', request).subscribe((data: any) => {
+      console.log('generateInteractTelemetry for Scan', data);
+    });
+  }
 
   private startQRScanner(screenTitle: string, displayText: string, displayTextColor: string,
     buttonText: string, showButton: boolean, source: string) {
     window['qrScanner'].startScanner(screenTitle, displayText,
       displayTextColor, buttonText, showButton, this.platform.isRTL, (scannedData) => {
+
+        console.log('********************Scan Data', scannedData);
+        const str = scannedData.match(/^VIS/g);
+        if (str) {
+          this.visitorService.getVisitorData(scannedData).subscribe(
+                data  => {
+                    console.log('POST Request is successful ******', data.result.Visitor);
+                    const res = data.result.Visitor;
+                    this.commonUtil.hierarchyInfo = [
+                      {'visitorId': res.code},
+                      {'stallId': 'STA2'},
+                      {'idea': 'idea'}
+                    ];
+                    this.generateStartEventForDevCon(res);
+                    this.app.getActiveNavs()[0].push(SearchPage, { loginMode: 'guest', headerTitle: 'Select Class',
+                    vistorName: res.name, visitorId: res.code});
+                    this.stopScanner();
+                  },
+                error  => {
+                    console.log('Error', error);
+                    this.stopScanner();
+                }
+            );
+          // this.app.getActiveNavs()[0].push(SearchPage, { loginMode: 'guest', headerTitle: 'Select Class',
+          //           vistorName: 'Test', visitorId: 'VIS999'});
+          //           this.stopScanner();
+        } else
+        if (scannedData) {
+            this.commonUtil.showToast('Invalid Qr Code');
+            this.stopScanner();
+        } else
         if (scannedData === 'skip') {
           if (this.appGlobalService.DISPLAY_ONBOARDING_CATEGORY_PAGE) {
             this.app.getActiveNavs()[0].push(ProfileSettingsPage, { stopScanner: true });
@@ -205,12 +274,12 @@ export class SunbirdQRScanner {
       source === PageId.ONBOARDING_PROFILE_PREFERENCES ? Environment.ONBOARDING : Environment.HOME);
   }
 
-  generateStartEvent(pageId: string) {
+  generateStartEvent(scanData) {
     const telemetryObject: TelemetryObject = new TelemetryObject();
     telemetryObject.id = '';
     telemetryObject.type = 'qr';
     this.telemetryGeneratorService.generateStartTelemetry(
-      PageId.QRCodeScanner,
+      scanData,
       telemetryObject);
   }
 

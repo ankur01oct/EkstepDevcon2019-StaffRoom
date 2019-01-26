@@ -1,3 +1,5 @@
+import { FormsModule } from '@angular/forms';
+import { MbscModule } from '@mobiscroll/angular';
 import {ErrorHandler, NgModule} from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
 import {Events, IonicApp, IonicErrorHandler, IonicModule} from 'ionic-angular';
@@ -35,6 +37,8 @@ export const createTranslateLoader = (httpClient: HttpClient) => {
     BroadcastComponent
   ],
   imports: [
+    FormsModule,
+    MbscModule,
     HttpClientModule,
     BrowserModule,
     FrameworkModule,
@@ -77,6 +81,7 @@ export const createTranslateLoader = (httpClient: HttpClient) => {
     CommonUtilService,
     LogoutHandlerService,
     TncUpdateHandlerService,
+    HttpClientModule,
     { provide: ErrorHandler, useClass: IonicErrorHandler }
   ],
   exports: [

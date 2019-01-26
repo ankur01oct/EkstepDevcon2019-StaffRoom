@@ -86,7 +86,7 @@ export class UserTypeSelectionPage {
 
     this.event.subscribe('event:showScanner', (data) => {
       if (data.pageName === PageId.USER_TYPE_SELECTION) {
-        this.scannerService.startScanner(PageId.USER_TYPE_SELECTION, true);
+        this.scannerService.startScanner(PageId.USER_TYPE_SELECTION, false);
       }
     });
   }
@@ -112,7 +112,8 @@ export class UserTypeSelectionPage {
     if (this.isChangeRoleRequest) {
       this.navCtrl.pop();
     } else {
-      this.navCtrl.setRoot(LanguageSettingsPage);
+      this.navCtrl.setRoot(UserTypeSelectionPage);
+      this.platform.exitApp();
     }
   }
 
@@ -233,7 +234,7 @@ export class UserTypeSelectionPage {
           loginMode: 'guest'
         });
       } else {
-        this.scannerService.startScanner(PageId.USER_TYPE_SELECTION, true);
+        this.scannerService.startScanner(PageId.USER_TYPE_SELECTION, false);
       }
     } else if (this.appGlobalService.DISPLAY_ONBOARDING_CATEGORY_PAGE) {
       this.navCtrl.push(ProfileSettingsPage);

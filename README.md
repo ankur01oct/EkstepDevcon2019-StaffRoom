@@ -38,3 +38,12 @@ Build for debug - `npm run build-debug`
 Build for release - `npm run build-rel`
 
 Run the android app - `npm run android`
+
+
+### Modified sunbird for devcon classroom theme.
+    this is modified for student app
+    student chooses from profile seletion page
+    scan qr code ,  for attendance 
+    checks available courses in class
+    plays content online
+    telemetry is sent for all the event.

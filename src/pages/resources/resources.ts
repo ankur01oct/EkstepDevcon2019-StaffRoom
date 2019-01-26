@@ -245,9 +245,10 @@ export class ResourcesPage implements OnInit, AfterViewInit {
       undefined,
       values);
 
+    console.log('****in resources.ts***', queryParams, headerTitle) ;
     queryParams = updateFilterInSearchQuery(queryParams, this.appliedFilter, this.profile, this.mode,
       this.isFilterApplied, this.appGlobalService);
-
+      console.log('****in resources.ts***', queryParams, headerTitle);
     this.navCtrl.push(ViewMoreActivityPage, {
       requestParams: queryParams,
       headerTitle: headerTitle

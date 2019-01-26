@@ -1,3 +1,5 @@
+import { PacketService } from './packetService';
+import { PackageSearchService } from './packagesearch.service';
 import {
   Component,
   NgZone,
@@ -62,7 +64,7 @@ export class SearchPage {
 
   showLoading: boolean;
   downloadProgress: any;
-  @ViewChild('searchInput') searchBar;
+  // @ViewChild('searchInput') searchBar;
 
   contentType: Array<string> = [];
 
@@ -111,14 +113,15 @@ export class SearchPage {
   private corRelationList: Array<CorrelationData>;
 
   profile: any;
-
+  visitorId: any;
+  vistorName: any;
   isFirstLaunch = false;
   shouldGenerateEndTelemetry = false;
   backButtonFunc = undefined;
   isSingleContent = false;
   currentFrameworkId = '';
   selectedLanguageCode = '';
-
+  showStartClass = false ;
   @ViewChild(Navbar) navBar: Navbar;
   constructor(
     private contentService: ContentService,
@@ -135,9 +138,12 @@ export class SearchPage {
     private commonUtilService: CommonUtilService,
     private telemetryGeneratorService: TelemetryGeneratorService,
     private preference: SharedPreferences,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private packageSearch: PackageSearchService,
+    private packetService: PacketService
   ) {
-
+    this.visitorId = this.navParams.get('visitorId');
+    this.vistorName = this.navParams.get('vistorName');
     this.checkUserSession();
 
     this.isFirstLaunch = true;
@@ -155,12 +161,12 @@ export class SearchPage {
   }
 
   ionViewDidEnter() {
-    if (!this.dialCode && this.isFirstLaunch) {
-      setTimeout(() => {
-        this.isFirstLaunch = false;
-        this.searchBar.setFocus();
-      }, 100);
-    }
+    // if (!this.dialCode && this.isFirstLaunch) {
+    //   setTimeout(() => {
+    //     this.isFirstLaunch = false;
+    //     this.searchBar.setFocus();
+    //   }, 100);
+    // }
 
     this.checkUserSession();
   }
@@ -235,6 +241,8 @@ export class SearchPage {
   }
 
   openContent(collection, content, index) {
+    console.log('inside open content', content);
+      this.commonUtilService.showToast('Selected Course Started!');
     this.parentContent = collection;
     this.generateInteractEvent(content.identifier, content.contentType, content.pkgVersion, index);
     if (collection !== undefined) {
@@ -244,8 +252,7 @@ export class SearchPage {
     } else {
       this.showContentDetails(content, true);
     }
-  }
-
+}
   showContentDetails(content, isRootContent: boolean = false) {
 
     let params;
@@ -397,6 +404,7 @@ export class SearchPage {
 
           this.addCorRelation(response.result.responseMessageId, 'API');
           this.searchContentResult = response.result.contentDataList;
+          console.log('***************search content result*****', this.searchContentResult);
           this.updateFilterIcon();
 
           this.isEmptyResult = false;
@@ -463,8 +471,50 @@ export class SearchPage {
 
     return assembleFilter;
   }
-
+  startClassroom() {
+    const req = {'visitorId': this.visitorId, 'visitorName': this.vistorName};
+    this.packetService.getPacket(req).subscribe((data) => {
+      if (data) {
+        this.showLoader = true;
+      this.packageSearch.packageSearch(data['id']).subscribe((resdata) => {
+        this.zone.run(() => {
+          this.searchContentResult = [];
+          this.searchContentResult = resdata.result.content;
+          if (resdata.result.content) {
+            this.showStartClass = false ;
+          }
+          this.showLoader = false;
+        });
+      });
+    }
+    });
+  }
+  endClassroom() {
+    this.packetService.deletePacket().subscribe( (data) => {
+      console.log(data);
+      this.navCtrl.pop();
+    } );
+  }
   init() {
+    if (this.appGlobalService.guestProfileType === ProfileType.STUDENT) {
+      this.showStartClass = true ;
+      this.startClassroom();
+    }
+    // for teacher
+    // this.showLoader = true;
+    // this.packageSearch.packageSearch().subscribe(
+    //   (data) => {
+    //     this.showLoader = false;
+    //     this.zone.run(() => {
+    //       console.log('inside api call package data', data.result.content);
+    //       this.searchContentResult = [];
+    //       this.searchContentResult =  data.result.content;
+    //     });
+    //   },
+    //   (err) => {
+    //     console.log (err.message);
+    //   }
+    // );
     this.dialCode = this.navParams.get('dialCode');
     this.contentType = this.navParams.get('contentType');
     this.corRelationList = this.navParams.get('corRelation');

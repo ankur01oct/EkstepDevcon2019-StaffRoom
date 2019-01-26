@@ -29,6 +29,7 @@ export class CommonUtilService implements OnDestroy {
     };
     connectSubscription: any;
     disconnectSubscription: any;
+    hierarchyInfo: any;
     constructor(
         private toastCtrl: ToastController,
         private translate: TranslateService,
